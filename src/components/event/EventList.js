@@ -3,13 +3,12 @@ import { useHistory } from "react-router-dom"
 import { EventContext } from "./EventProvider.js"
 
 export const EventList = (props) => {
-  const { events, getEvents } = useContext(EventContext)
+  const { events, getEvents, joinEvent } = useContext(EventContext)
   const history = useHistory()
 
   useEffect(() => {
     getEvents()
   }, [])
-  console.log(events)
   return (
     <article className="events">
       <header className="events__header">
@@ -24,8 +23,6 @@ export const EventList = (props) => {
         </button>
       </header>
       {events.map((event) => {
-        const e = event.event_time.toString()
-        console.log(new Date(e).toString("hh:mm"))
         return (
           <section key={event.id} className="registration">
             <div className="registration__game">Name-O-Game: {event.game.title}</div>
@@ -39,6 +36,9 @@ export const EventList = (props) => {
               })}
               {` `}@ All day long
             </div>
+            <button className="btn btn-2" onClick={() => joinEvent(event.id)}>
+              Join
+            </button>
           </section>
         )
       })}
