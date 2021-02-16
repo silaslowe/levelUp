@@ -3,11 +3,17 @@ import { useHistory } from "react-router-dom"
 import { GameContext } from "./GameProvider.js"
 
 export const GameList = (props) => {
-  const { games, getGames } = useContext(GameContext)
+  const { game, games, getGames, getSingleGame } = useContext(GameContext)
   const history = useHistory()
   useEffect(() => {
     getGames()
   }, [])
+
+  useEffect(() => {
+    getSingleGame(2)
+  }, [])
+
+  console.log(game)
   return (
     <article className="games">
       <button
