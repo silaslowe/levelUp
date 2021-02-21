@@ -2,9 +2,16 @@ import React, { useContext, useState, useEffect } from "react"
 import { GameContext } from "./GameProvider.js"
 import { useHistory } from "react-router-dom"
 
-export const GameForm = () => {
+export const GameForm = (props) => {
   const history = useHistory()
-  const { createGame, getGameTypes, gameTypes } = useContext(GameContext)
+  const { createGame, getGameTypes, gameTypes, getSingleGame, updateGame } = useContext(GameContext)
+
+  const [currentGame, setCurrentGame] = useState({
+    title: "",
+    number_of_players: 0,
+    description: "",
+    game_type: 0,
+  })
 
   /*
         Since the input fields are bound to the values of
@@ -15,18 +22,24 @@ export const GameForm = () => {
     getGameTypes()
   }, [])
 
+  useEffect(() => {
+    if ("gameId" in props.match.params) {
+      getSingleGame(props.match.params.gameId).then((game) => {
+        setCurrentGame({
+          title: game.title,
+          number_of_players: game.number_of_players,
+          description: game.description,
+          game_type: game.game_type.id,
+        })
+      })
+    }
+  }, [props.match.params.gameId])
+
   let num_of_players = []
 
   for (let i = 1; i < 11; i++) {
     num_of_players.push(i)
   }
-
-  const [currentGame, setCurrentGame] = useState({
-    title: "",
-    number_of_players: 0,
-    description: "",
-    game_type_id: 0,
-  })
 
   /*
   Get game types on initialization so that the <select>
@@ -46,8 +59,6 @@ export const GameForm = () => {
     setCurrentGame(newGameState)
   }
 
-  console.log(currentGame)
-  console.log(num_of_players)
   return (
     <form className="gameForm">
       <h2 className="gameForm__title">Register New Game</h2>
@@ -102,13 +113,13 @@ export const GameForm = () => {
 
       <fieldset>
         <div className="form-group">
-          <label htmlFor="game_type_id">Game Type: </label>
+          <label htmlFor="game_type">Game Type: </label>
           <select
             type="text"
-            name="game_type_id"
+            name="game_type"
             required
             className="form-control"
-            value={currentGame.game_type_id}
+            value={currentGame.game_type}
             onChange={changeGameState}
           >
             {gameTypes.map((gt) => (
@@ -121,27 +132,45 @@ export const GameForm = () => {
       </fieldset>
 
       {/* You create the rest of the input fields for each game property */}
+      {"gameId" in props.match.params ? (
+        <button
+          onClick={(evt) => {
+            // Prevent form from being submitted
+            evt.preventDefault()
 
-      <button
-        type="submit"
-        onClick={(evt) => {
-          // Prevent form from being submitted
-          evt.preventDefault()
+            // Send POST request to your API
+            updateGame({
+              id: parseInt(props.match.params.gameId),
+              description: currentGame.description,
+              title: currentGame.title,
+              number_of_players: parseInt(currentGame.number_of_players),
+              game_type: parseInt(currentGame.game_type),
+            }).then(() => history.push("/games"))
+          }}
+          className="btn btn-primary"
+        >
+          Edit
+        </button>
+      ) : (
+        <button
+          type="submit"
+          onClick={(evt) => {
+            // Prevent form from being submitted
+            evt.preventDefault()
 
-          const game = {
-            description: currentGame.description,
-            title: currentGame.title,
-            number_of_players: parseInt(currentGame.number_of_players),
-            game_type_id: parseInt(currentGame.game_type_id),
-          }
-
-          // Send POST request to your API
-          createGame(game).then(() => history.push("/"))
-        }}
-        className="btn btn-primary"
-      >
-        Create
-      </button>
+            // Send POST request to your API
+            createGame({
+              description: currentGame.description,
+              title: currentGame.title,
+              number_of_players: parseInt(currentGame.number_of_players),
+              game_type: parseInt(currentGame.game_type),
+            }).then(() => history.push("/games"))
+          }}
+          className="btn btn-primary"
+        >
+          Create
+        </button>
+      )}
     </form>
   )
 }

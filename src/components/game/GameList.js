@@ -9,10 +9,6 @@ export const GameList = (props) => {
     getGames()
   }, [])
 
-  useEffect(() => {
-    getSingleGame(2)
-  }, [])
-
   console.log(game)
   return (
     <article className="games">
@@ -30,6 +26,10 @@ export const GameList = (props) => {
             <div className="game__title">{game.title}</div>
             <div className="game__players">{game.number_of_players} players needed</div>
             <div className="game__description">Description: {game.description}</div>
+            <div className="game__type">Type: {game.game_type.label}</div>
+            <button className="btn" onClick={() => history.push(`/games/${game.id}/edit`)}>
+              Edit
+            </button>
           </section>
         )
       })}
